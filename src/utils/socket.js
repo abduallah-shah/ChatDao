@@ -17,7 +17,8 @@ const connectSocket = (token) => {
     reconnectionDelayMax: 5000,
     reconnectionAttempts: 5,
     timeout: 20000,
-    forceNew: true
+    forceNew: true,
+    auth: { token } // Added auth property for extra security
   });
 
   socket.on('connect', () => {
@@ -28,6 +29,7 @@ const connectSocket = (token) => {
   socket.on('connect_error', (error) => {
     console.error('Socket connection error:', error.message);
     isConnecting = false;
+    // Optionally handle reconnection here if needed
   });
 
   socket.on('disconnect', () => {
@@ -37,4 +39,13 @@ const connectSocket = (token) => {
   return socket;
 };
 
-export { socket, connectSocket };
+// Clean disconnect function
+const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+    isConnecting = false;
+  }
+};
+
+export { socket, connectSocket, disconnectSocket };
