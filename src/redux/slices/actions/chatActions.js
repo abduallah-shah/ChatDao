@@ -1,5 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { SetLoading } from "../userSlice";
+
+import { SetLoading, ShowSnackbar } from "../userSlice";
+
 import axios from "../../../utils/axios";
 import { socket } from "../../../utils/socket";
 import { closeActiveConversation } from "../chatSlice";
@@ -9,12 +11,25 @@ export const GetConversations = createAsyncThunk(
   "conversation/get-conversations",
   async (arg, { rejectWithValue, dispatch }) => {
     try {
+      // set user loading to true
       dispatch(SetLoading(true));
+
       const { data } = await axios.get("/conversation/get-conversations/");
+
+      // set user loading to false
       dispatch(SetLoading(false));
       return data;
     } catch (error) {
+      // set user loading to false
       dispatch(SetLoading(false));
+
+      // show snackbar
+      dispatch(
+        ShowSnackbar({
+          severity: error.error.status,
+          message: error.error.message,
+        })
+      );
       return rejectWithValue(error.error);
     }
   }
@@ -33,9 +48,19 @@ export const CreateOpenConversation = createAsyncThunk(
       );
 
       dispatch(closeActiveConversation());
+
+      // emit join conversation to socket
       socket.emit("join_conversation", data.conversation._id);
+
       return data;
     } catch (error) {
+      // show snackbar
+      dispatch(
+        ShowSnackbar({
+          severity: error.error.status,
+          message: error.error.message,
+        })
+      );
       return rejectWithValue(error.error);
     }
   }
@@ -44,28 +69,45 @@ export const CreateOpenConversation = createAsyncThunk(
 // ------------- Get Messages -------------
 export const GetMessages = createAsyncThunk(
   "message/get-messages",
-  async (convoId, { rejectWithValue }) => {
+  async (convoId, { rejectWithValue, dispatch }) => {
     try {
       const { data } = await axios.get(`/message/get-messages/${convoId}`);
+
       return data;
     } catch (error) {
+      // show snackbar
+      dispatch(
+        ShowSnackbar({
+          severity: error.error.status,
+          message: error.error.message,
+        })
+      );
       return rejectWithValue(error.error);
     }
   }
 );
 
-// ------------- Send Message -------------
+// ------------- Get Messages -------------
 export const SendMessage = createAsyncThunk(
   "message/send-message",
-  async (messageData, { rejectWithValue, getState }) => {
+  async (messageData, { rejectWithValue, dispatch, getState }) => {
     try {
       const { data } = await axios.post("/message/send-message", messageData);
 
+      // Approach check
       if (!getState().chat.isOptimistic) {
+        // emit send message to socket
         socket.emit("send_message", data.message);
       }
       return data;
     } catch (error) {
+      // show snackbar
+      dispatch(
+        ShowSnackbar({
+          severity: error.error.status,
+          message: error.error.message,
+        })
+      );
       return rejectWithValue(error.error);
     }
   }
