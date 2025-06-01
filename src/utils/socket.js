@@ -8,17 +8,27 @@ const connectSocket = (token) => {
 
   socket = io(baseUrl, {
     path: "/socket.io",
-    transports: ['polling', 'websocket'],  // Try polling first
+    transports: ['polling'],
     query: { token },
     withCredentials: true,
     reconnection: true,
-    reconnectionAttempts: 5,
+    reconnectionAttempts: 3,
     reconnectionDelay: 1000,
-    timeout: 20000
+    timeout: 45000,
+    autoConnect: true
   });
 
   socket.on("connect_error", (error) => {
-    console.error("Connection error:", error.message);
+    console.error("Socket connection error:", error.message);
+    console.error("Socket connection details:", {
+      id: socket.id,
+      connected: socket.connected,
+      disconnected: socket.disconnected
+    });
+  });
+
+  socket.on("error", (error) => {
+    console.error("Socket error:", error);
   });
 
   return socket;
