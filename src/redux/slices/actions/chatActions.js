@@ -77,10 +77,10 @@ export const GetMessages = createAsyncThunk(
     } catch (error) {
       // show snackbar
       dispatch(
-        ShowSnackbar({
-          severity: error.error.status,
-          message: error.error.message,
-        })
+        // ShowSnackbar({
+        //   severity: error.error.status,
+        //   message: error.error.message,
+        // })
       );
       return rejectWithValue(error.error);
     }
@@ -103,10 +103,10 @@ export const SendMessage = createAsyncThunk(
     } catch (error) {
       // show snackbar
       dispatch(
-        ShowSnackbar({
-          severity: error.error.status,
-          message: error.error.message,
-        })
+        // ShowSnackbar({
+        //   severity: error.error.status,
+        //   message: error.error.message,
+        // })
       );
       return rejectWithValue(error.error);
     }
