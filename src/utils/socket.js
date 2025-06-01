@@ -6,12 +6,17 @@ const connectSocket = (token) => {
   const apiOrigin = process.env.REACT_APP_API_ORIGIN || "http://localhost:8000/api";
   const baseUrl = apiOrigin.split("/api")[0];
 
-  socket = io(baseUrl, { 
+  socket = io(baseUrl, {
+    path: "/socket.io",
+    transports: ['polling', 'websocket'],  // Try polling first
     query: { token },
-    transports: ['websocket', 'polling']
+    withCredentials: true,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    timeout: 20000
   });
 
-  // Add minimal error logging
   socket.on("connect_error", (error) => {
     console.error("Connection error:", error.message);
   });
